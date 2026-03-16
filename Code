@@ -1,0 +1,77 @@
+import tkinter as tk
+from tkinter import Menu
+import psutil
+
+class DesktopWidget:
+    def __init__(self):
+        self.root = tk.Tk()
+        
+        # 1. Window Configuration
+        self.root.title("HW Monitor")
+        self.root.geometry("160x130+30+30") # Small box
+        self.root.overrideredirect(True)      # Remove borders/title bar
+        self.root.attributes("-topmost", True) # Stay on top of all apps
+        self.root.attributes("-alpha", 0.85)   # Subtle transparency
+        self.root.configure(bg="#1a1a1a")      # Sleek dark background
+
+        # 2. UI Elements (Labels)
+        self.header = tk.Label(self.root, text="SYSTEM STATUS", font=("Segoe UI", 8, "bold"), fg="#888", bg="#1a1a1a")
+        self.header.pack(pady=(5,2))
+
+        # Reusable label styling
+        style = {"font": ("Consolas", 10, "bold"), "bg": "#1a1a1a", "anchor": "w"}
+        
+        self.cpu_lbl = tk.Label(self.root, text="CPU: 0%", fg="#3498db", **style)
+        self.cpu_lbl.pack(fill="x", padx=15)
+        
+        self.ram_lbl = tk.Label(self.root, text="RAM: 0%", fg="#2ecc71", **style)
+        self.ram_lbl.pack(fill="x", padx=15)
+        
+        self.dsk_lbl = tk.Label(self.root, text="DSK: 0%", fg="#f1c40f", **style)
+        self.dsk_lbl.pack(fill="x", padx=15)
+
+        self.bat_lbl = tk.Label(self.root, text="BAT: --", fg="#9b59b6", **style)
+        self.bat_lbl.pack(fill="x", padx=15)
+
+        # 3. Right-Click Menu (To Close Program)
+        self.menu = Menu(self.root, tearoff=0)
+        self.menu.add_command(label="Exit Monitor", command=self.root.destroy)
+        
+        # Bindings
+        self.root.bind("<Button-3>", self.show_menu) # Right-click to show menu
+        self.root.bind("<Button-1>", self.start_move) # Left-click to drag
+        self.root.bind("<B1-Motion>", self.do_move)
+
+        self.update_stats()
+        self.root.mainloop()
+
+    def update_stats(self):
+        # Fetch Hardware Data
+        cpu = psutil.cpu_percent()
+        ram = psutil.virtual_memory().percent
+        dsk = psutil.disk_usage('/').percent
+        bat = psutil.sensors_battery()
+        
+        # Format Battery String
+        bat_icon = "🔌" if (bat and bat.power_plugged) else "🔋"
+        bat_val = f"{int(bat.percent)}%{bat_icon}" if bat else "N/A"
+
+        # Update Text & Colors based on usage
+        self.cpu_lbl.config(text=f"CPU: {cpu}%", fg="#e74c3c" if cpu > 85 else "#3498db")
+        self.ram_lbl.config(text=f"RAM: {ram}%", fg="#e74c3c" if ram > 90 else "#2ecc71")
+        self.dsk_lbl.config(text=f"DSK: {dsk}%")
+        self.bat_lbl.config(text=f"BAT: {bat_val}")
+
+        self.root.after(2000, self.update_stats) # Refresh every 2 seconds
+
+    # Interaction Methods
+    def show_menu(self, event): self.menu.post(event.x_root, event.y_root)
+    def start_move(self, event): self.x, self.y = event.x, event.y
+    def do_move(self, event):
+        x = self.root.winfo_x() + (event.x - self.x)
+        y = self.root.winfo_y() + (event.y - self.y)
+        self.root.geometry(f"+{x}+{y}")
+
+if __name__ == "__main__":
+    DesktopWidget()
+
