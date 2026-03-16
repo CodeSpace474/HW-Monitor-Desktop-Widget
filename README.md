@@ -1,6 +1,6 @@
-## Project Description
+# Project Description
 
-# HW-Monitor-Desktop-Widget
+## HW-Monitor-Desktop-Widget
 Simple desktop widget to keep track of current hardware scenario
 
 HW Monitor Desktop Widget is a lightweight desktop system monitoring tool built using Python. The application displays real-time hardware usage statistics such as CPU usage, RAM usage, Disk usage, and Battery status in a compact floating window on the desktop. The widget is designed to stay on top of all applications and provides quick system status monitoring without opening any heavy software.
